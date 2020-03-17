@@ -1,0 +1,9 @@
+insert into lab3.book_author (book_id, author_id) values (5, 1);
+insert into lab3.book_author (book_id, author_id) values (5, 2);
+insert into lab3.book_author (book_id, author_id) values (1, 3);
+insert into lab3.book_author (book_id, author_id) values (2, 4);
+insert into lab3.book_author (book_id, author_id) values (3, 5);
+insert into lab3.book_author (book_id, author_id) values (4, 6);
+insert into lab3.book_author (book_id, author_id) values (4, 7);
+insert into lab3.book_author (book_id, author_id) values (4, 8);
+insert into lab3.book_author (book_id, author_id) values (4, 9);

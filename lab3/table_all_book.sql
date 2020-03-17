@@ -1,0 +1,14 @@
+insert into lab3.all_book (store_id, book_id, count) values (1, 1, 3);
+insert into lab3.all_book (store_id, book_id, count) values (1, 2, 6);
+insert into lab3.all_book (store_id, book_id, count) values (1, 3, 1);
+insert into lab3.all_book (store_id, book_id, count) values (1, 4, 4);
+insert into lab3.all_book (store_id, book_id, count) values (1, 5, 9);
+insert into lab3.all_book (store_id, book_id, count) values (2, 2, 5);
+insert into lab3.all_book (store_id, book_id, count) values (2, 4, 7);
+insert into lab3.all_book (store_id, book_id, count) values (2, 5, 0);
+insert into lab3.all_book (store_id, book_id, count) values (3, 1, 0);
+insert into lab3.all_book (store_id, book_id, count) values (3, 2, 1);
+insert into lab3.all_book (store_id, book_id, count) values (3, 3, 4);
+insert into lab3.all_book (store_id, book_id, count) values (3, 5, 2);
+insert into lab3.all_book (store_id, book_id, count) values (1, 6, 7);
+insert into lab3.all_book (store_id, book_id, count) values (2, 6, 12);
