@@ -91,7 +91,12 @@ where room_in_booking.id_room_in_booking in (
       )
 
 #7. Найти все "пересекающиеся" варианты проживания. Правильное состояние:не может быть забронирован один номер на одну дату несколько раз, т.к. нельзя заселиться нескольким клиентам в один номер. Записи в таблице room_in_booking с id_room_in_booking = 5 и 2154 являются примером неправильного с остояния, которые необходимо найти. Результирующий кортеж выборки должен содержать информацию о двух конфликтующих номерах.
-
+SELECT rib1.id_room_in_booking, rib1.id_room, rib1.checkin_date, rib1.checkout_date, rib2.checkin_date, rib2.checkout_date
+FROM room_in_booking AS rib1
+         LEFT JOIN lab4.room_in_booking AS rib2 ON rib1.id_room = rib2.id_room
+WHERE rib1.id_room = rib2.id_room
+  AND (rib1.checkin_date > rib2.checkin_date AND rib1.checkout_date < rib2.checkout_date)
+ORDER BY rib1.id_room
 
 
 #8. Создать бронирование в транзакции.
@@ -104,6 +109,23 @@ begin transaction;
 commit;
 
 
-
 #9. Добавить необходимые индексы для всех таблиц
+
+create index booking_id_client_index
+	on booking (id_client);
+
+create index room_in_booking_checkin_date_checkout_date_index
+	on room_in_booking (checkin_date, checkout_date);
+
+create index room_in_booking_id_room_id_booking_index
+	on room_in_booking (id_room, id_booking);
+
+create index room_id_hotel_id_room_category_index
+	on room (id_hotel, id_room_category);
+
+create index room_category_name_id_room_category_index
+	on room_category (name);
+
+create index hotel_name_index
+	on hotel (name);
 
