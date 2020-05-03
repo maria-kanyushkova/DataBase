@@ -49,14 +49,17 @@ AS
 $$
 SELECT student.name,
        subject.name
-FROM lesson
-         LEFT JOIN "group" on "group".id_group = lesson.id_group
-         LEFT JOIN student on "group".id_group = student.id_group
-         LEFT JOIN subject on subject.id_subject = lesson.id_subject
-         LEFT JOIN mark on mark.id_lesson = lesson.id_lesson
+FROM student
+         INNER JOIN "group" ON "group".id_group = student.id_group
+         INNER JOIN lesson ON lesson.id_group = "group".id_group
+         LEFT JOIN mark ON mark.id_student = student.id_student AND mark.id_lesson = lesson.id_lesson
+         INNER JOIN subject ON subject.id_subject = lesson.id_subject
 WHERE "group".name = identifier
-  AND mark.id_mark is null;
+GROUP BY student.name, subject.name
+HAVING COUNT(mark.mark) = 0
+ORDER BY student.name
 $$;
+
 
 SELECT *
 FROM debtor_info('ПС');
@@ -71,18 +74,21 @@ FROM debtor_info('БИ');
 #    которым занимается не менее 35 студентов.
 SELECT subject.name,
        AVG(mark.mark)
-FROM subject
-         LEFT JOIN lesson ON lesson.id_subject = subject.id_subject
-         LEFT JOIN "group" ON lesson.id_group = "group".id_group
-         LEFT JOIN student ON "group".id_group = student.id_group
-         LEFT JOIN mark ON (mark.id_student = student.id_student AND mark.id_lesson = lesson.id_lesson)
-GROUP BY subject.id_subject
+FROM mark
+         LEFT JOIN lesson ON mark.id_lesson = lesson.id_lesson
+         LEFT JOIN subject ON lesson.id_subject = subject.id_subject
+         LEFT JOIN student ON mark.id_student = student.id_student
+GROUP BY subject.name
 HAVING (COUNT(DISTINCT student.id_student) >= 35)
 
 # 5. Дать оценки студентов специальности ВМ по всем проводимым предметам с
 #    указанием группы, фамилии, предмета, даты. При отсутствии оценки заполнить
 #    значениями NULL поля оценки.
-SELECT subject.name, "group".name, student.name, mark.mark, lesson.date
+SELECT subject.name AS subject_name,
+       "group".name AS group_name,
+       student.name AS student_name,
+       mark.mark,
+       lesson.date
 FROM student
          LEFT JOIN "group" ON student.id_group = "group".id_group
          LEFT JOIN lesson ON lesson.id_group = "group".id_group
@@ -105,9 +111,12 @@ WHERE mark.id_student IN (
     FROM lesson
              LEFT JOIN "group" ON "group".id_group = lesson.id_group
              LEFT JOIN student ON "group".id_group = student.id_group
+             LEFT JOIN subject ON lesson.id_subject = subject.id_subject
              LEFT JOIN mark ON (mark.id_student = student.id_student AND mark.id_lesson = lesson.id_lesson)
     WHERE lesson.date < CAST('2019-05-12' AS date)
+      AND subject.name = 'БД'
 )
+  AND mark.mark < 5
 
 # 7. Добавить необходимые индексы.
 create index group_name_index
