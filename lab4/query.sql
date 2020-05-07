@@ -1,5 +1,4 @@
 # 1. Добавить внешние ключи
-
 alter table booking
 	add constraint booking_client_id_client_fk
 		foreign key (id_client) references client;
@@ -21,7 +20,6 @@ alter table room
 		foreign key (id_room_category) references room_category;
 
 # 2. Выдать информацию о клиентах гостиницы “Космос”, проживающих в номерах категории “Люкс” на 1 апреля 2019г.
-
 select client.name, client.phone
 from booking
          left join client on client.id_client = booking.id_client
@@ -36,7 +34,6 @@ where checkin_date <= CAST('2019-04-01' as DATE)
 
 #3. Дать список свободных номеров всех гостиниц на 22 апреля 
 # (из множества всех комнат которые есть, вычитаем комнаты которые заняты на 22 апреля)
-
 select * from room
 except
 select room.*
@@ -46,7 +43,6 @@ select room.*
            and checkout_date >= CAST('2019-04-22' as DATE)
 
 #4. Дать количество проживающих в гостинице “Космос” на 23 марта по каждой категории номеров
-
 select count(id_client), room_category.name
 from booking
          left join room_in_booking on room_in_booking.id_booking = booking.id_booking
@@ -59,7 +55,6 @@ where checkin_date <= CAST('2019-03-23' as DATE)
 group by room_category.id_room_category
 
 #5. Дать список последних проживавших клиентов по всем комнатам гостиницы “Космос”, выехавшим в апреле с указанием даты выезда
-
 select client.name, t.id_room, t.date
 from (
          select max(checkout_date) over (partition by id_room) as date, id_room, id_booking, checkout_date
@@ -75,7 +70,6 @@ where date = t.checkout_date
   and hotel.name = 'Космос'
 
 #6. Продлить на 2 дня дату проживания в гостинице “Космос” всем клиентам комнат категории “Бизнес”, которые заселились 10 мая.
-
 update room_in_booking
 set checkout_date = checkout_date + interval '2 days'
 where room_in_booking.id_room_in_booking in (
@@ -90,17 +84,22 @@ where room_in_booking.id_room_in_booking in (
             and room_category.name = 'Бизнес'
       )
 
-#7. Найти все "пересекающиеся" варианты проживания. Правильное состояние:не может быть забронирован один номер на одну дату несколько раз, т.к. нельзя заселиться нескольким клиентам в один номер. Записи в таблице room_in_booking с id_room_in_booking = 5 и 2154 являются примером неправильного с остояния, которые необходимо найти. Результирующий кортеж выборки должен содержать информацию о двух конфликтующих номерах.
-SELECT rib1.id_room_in_booking, rib1.id_room, rib1.checkin_date, rib1.checkout_date, rib2.checkin_date, rib2.checkout_date
-FROM room_in_booking AS rib1
-         LEFT JOIN lab4.room_in_booking AS rib2 ON rib1.id_room = rib2.id_room
-WHERE rib1.id_room = rib2.id_room
-  AND (rib1.checkin_date > rib2.checkin_date AND rib1.checkout_date < rib2.checkout_date)
-ORDER BY rib1.id_room
-
+#7. Найти все "пересекающиеся" варианты проживания. Правильное состояние:не может быть забронирован один номер на одну
+#   дату несколько раз, т.к. нельзя заселиться нескольким клиентам в один номер.
+#   Записи в таблице room_in_booking с id_room_in_booking = 5 и 2154 являются примером неправильного с остояния,
+#   которые необходимо найти. Результирующий кортеж выборки должен содержать информацию о двух конфликтующих номерах.
+// todo: исправить
+// для проверки select * from room_in_booking where id_room_in_booking IN (1, 1902)
+SELECT rib1.id_room_in_booking
+FROM room_in_booking rib1
+         LEFT JOIN room_in_booking AS rib2 ON rib1.id_room = rib2.id_room
+WHERE rib1.id_room_in_booking != rib2.id_room_in_booking
+      AND ((rib2.checkin_date <= rib1.checkin_date AND rib1.checkin_date < rib2.checkout_date)
+        OR (rib1.checkin_date <= rib2.checkin_date AND rib2.checkin_date < rib1.checkout_date))
+GROUP BY rib1.id_room_in_booking
+ORDER BY rib1.id_room_in_booking
 
 #8. Создать бронирование в транзакции.
-
 begin transaction;
 	insert into booking (id_booking, id_client, booking_date)
 	values (10000, 4, now());
@@ -108,9 +107,7 @@ begin transaction;
 	values (10000, 10000, 1, date('2020-05-01'), date('2020-05-10'));
 commit;
 
-
 #9. Добавить необходимые индексы для всех таблиц
-
 create index booking_id_client_index
 	on booking (id_client);
 

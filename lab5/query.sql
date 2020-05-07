@@ -41,15 +41,18 @@ WHERE medicine.name = 'Кордеон'
 
 # 3. Дать список лекарств компании "Фарма", на которые не были сделаны заказы
 #    до 25 января.
-SELECT medicine.id_medicine,
-       medicine.name
+// todo: добавить новое лекарство в Фарму и убедиться что при выполнении запроса это лекарство есть
+SELECT medicine.name
+FROM medicine
+    EXCEPT
+SELECT medicine.name
 FROM medicine
          LEFT JOIN production ON medicine.id_medicine = production.id_medicine
          LEFT JOIN company ON production.id_company = company.id_company
          LEFT JOIN "order" ON production.id_production = "order".id_production
 WHERE company.name = 'Фарма'
-GROUP BY medicine.id_medicine, medicine.name
-HAVING MIN("order".date) >= CAST('2019-01-25' AS DATE)
+GROUP BY medicine.name
+HAVING MIN("order".date) < CAST('2019-01-25' AS DATE)
 
 # 4. Дать минимальный и максимальный баллы лекарств каждой фирмы, которая
 #    оформила не менее 120 заказов.
