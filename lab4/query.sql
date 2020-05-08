@@ -88,16 +88,17 @@ where room_in_booking.id_room_in_booking in (
 #   дату несколько раз, т.к. нельзя заселиться нескольким клиентам в один номер.
 #   Записи в таблице room_in_booking с id_room_in_booking = 5 и 2154 являются примером неправильного с остояния,
 #   которые необходимо найти. Результирующий кортеж выборки должен содержать информацию о двух конфликтующих номерах.
-// todo: исправить
-// для проверки select * from room_in_booking where id_room_in_booking IN (1, 1902)
-SELECT rib1.id_room_in_booking
+SELECT rib1.id_room_in_booking as rib1,
+       rib2.id_room_in_booking as rib2,
+       rib1.id_room as id_room,
+       rib1.checkin_date as in1,
+       rib1.checkout_date as out1,
+       rib2.checkin_date as in2,
+       rib2.checkout_date as out2
 FROM room_in_booking rib1
          LEFT JOIN room_in_booking AS rib2 ON rib1.id_room = rib2.id_room
-WHERE rib1.id_room_in_booking != rib2.id_room_in_booking
-      AND ((rib2.checkin_date <= rib1.checkin_date AND rib1.checkin_date < rib2.checkout_date)
-        OR (rib1.checkin_date <= rib2.checkin_date AND rib2.checkin_date < rib1.checkout_date))
-GROUP BY rib1.id_room_in_booking
-ORDER BY rib1.id_room_in_booking
+WHERE (rib1.id_room_in_booking != rib2.id_room_in_booking)
+  AND (rib1.checkin_date < rib2.checkin_date AND rib2.checkin_date < rib1.checkout_date);
 
 #8. Создать бронирование в транзакции.
 begin transaction;
